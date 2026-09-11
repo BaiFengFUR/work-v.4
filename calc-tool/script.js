@@ -33,3 +33,38 @@ console.log('总支出：', totalSpent(cleanExpenses(expenses)));
 console.log('平均每笔：', averageExpense(cleanExpenses(expenses)));
 console.log('最高单笔：', topExpense(cleanExpenses(expenses)));
 console.log('各分类小计：', categoryTotals(cleanExpenses(expenses)));
+// 消费等级判定（单值进单值出，纯函数）
+const toLevel = (amount) => {
+  if (amount >= 200) return '高消费';
+  if (amount >= 100) return '中消费';
+  if (amount >= 50) return '低消费';
+  return '微量消费';
+};
+// 各等级笔数统计
+const levelCount = (list) => {
+  const result = { '高消费': 0, '中消费': 0, '低消费': 0, '微量消费': 0 };
+  list.forEach(e => { result[toLevel(e.amount)]++; });
+  return result;
+};
+// 分类摘要（map用法）
+const categorySummary = (list) => {
+  const totals = categoryTotals(list);
+  return Object.keys(totals).map(cat => `${cat}:${totals[cat]}元`);
+};
+// 格式化报告
+const report = (list) => {
+  const valid = cleanExpenses(list);
+  if (valid.length === 0) {
+    return '没有有效消费记录';
+  }
+  const dist = levelCount(valid);
+  const cats = categorySummary(valid).join('、');
+  return `有效记录${valid.length}笔，总支出${totalSpent(valid)}元，平均每笔${averageExpense(valid)}元，最高单笔${topExpense(valid).amount}元（${topExpense(valid).note}）；
+分类小计：${cats}；
+消费等级：高消费${dist['高消费']}笔 中消费${dist['中消费']}笔 低消费${dist['低消费']}笔 微量消费${dist['微量消费']}笔`;
+};
+try {
+  console.log(report(expenses));
+} catch (err) {
+  console.error('报告生成失败：', err.message);
+}
